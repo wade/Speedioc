@@ -7,7 +7,7 @@ STATUS: **Experimental**
 NuGet Package
 -------------
 
-[https://nuget.org/packages/Speedioc](https://nuget.org/packages/Speedioc)
+[http://nuget.org/packages/Speedioc](http://nuget.org/packages/Speedioc)
 
 
 Overview
