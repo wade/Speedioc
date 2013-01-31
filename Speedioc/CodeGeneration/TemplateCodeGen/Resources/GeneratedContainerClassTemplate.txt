@@ -1,0 +1,50 @@
+﻿// ****************************************************************************
+// *  ***** GENERATED CODE WARNING *****  ***** GENERATED CODE WARNING *****
+// *  ----------------------------------------------------------------------
+// *  This code was automatically generated.
+// *  
+// *  DO NOT MODIFY THIS FILE OR CODE.
+// *  
+// *  Changes to this file will be lost when the code is regenerated.
+// *  
+// ****************************************************************************
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Speedioc.Core;
+using Speedioc.Registration;
+using Speedioc.Registration.Core;
+
+namespace $Namespace$
+{
+	public sealed class $ClassName$ : ContainerBase
+	{
+		public $ClassName$(ICollection<IRegistration> registrations)
+			: base(registrations, "$ContainerId$")
+		{
+		}
+
+		protected override Dictionary<Type, object> CreateHandlerMap()
+		{
+			return
+				new Dictionary<Type, object>
+					{
+$HandlerMapEntries$
+					};
+		}
+
+		protected override Dictionary<Type, Dictionary<string, object>> CreateNamedHandlerMap()
+		{
+			var map = new Dictionary<Type, Dictionary<string, object>>();
+$NamedHandlerMapEntries$
+			return map;
+		}
+
+		protected override void PreCreateInstances()
+		{
+$PreCreateInstances$
+		}
+
+$Members$
+	}
+}

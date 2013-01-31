@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Clean;Build;RunTests">
+	<PropertyGroup>
+		<PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+		<ShouldRunTests Condition="'$(ShouldRunTests)' == ''">false</ShouldRunTests>
+		<RootDir Condition="'$(RootDir)' == ''">$(MSBuildProjectDirectory)\..\</RootDir>
+		<BuildDir Condition="'$(BuildDir)' == ''">$(RootDir).build\</BuildDir>
+		<OutDir Condition="'$(OutDir)' == ''">$(BuildDir)out\</OutDir>
+		<BinDir Condition="'$(BinDir)' == ''">$(OutDir)bin\</BinDir>
+		<BinDepDir Condition="'$(BinDepDir)' == ''">$(OutDir)bindep\</BinDepDir>
+		<NuGetPackagesDir Condition="'$(NuGetPackagesDir)' == ''">$(RootDir)packages\</NuGetPackagesDir>
+		<ProjectsOutDir Condition="'$(ProjectsOutDir)' == ''">$(OutDir)projects\</ProjectsOutDir>
+		<TestsOutDir Condition="'$(TestsOutDir)' == ''">$(ProjectsOutDir)Speedioc.Tests\</TestsOutDir>
+		<NUnitToolPath Condition="'$(NUnitToolPath)' == ''">$(NuGetPackagesDir)NUnit.Runners.2.6.2\tools\</NUnitToolPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<DirsToMake Include="$(OutDir)" />
+		<DirsToMake Include="$(BinDir)" />
+		<DirsToMake Include="$(ProjectsOutDir)" />
+	</ItemGroup>
+	<ItemGroup>
+		<TestDirsToMake Include="$(TestsOutDir)" />
+	</ItemGroup>
+
+<!--
+***************************************************************************************************
+***************************************************************************************************
+	Section: MSBuild Imports and Refrenced Assemblies
+***************************************************************************************************
+***************************************************************************************************
+-->
+	<!--*******************************************************************************************
+	    MSBuild.Community.Tasks
+		Instead of just using supplied targets file which imports all tasks, 
+		selectively import only the tasks needed. This is being done because of 
+		a task naming conflict with the NUnit task. The NUnit task from MSBuild.Community.Tasks
+		is not being used as it is hard-coded to only support NUnit 2.4 and this build is designed 
+		to use NUnit 2.6.2 supporting .NET 4.0\4.5.
+	    *******************************************************************************************-->
+	<PropertyGroup>
+		<MSBuildCommunityTasksPath Condition="'$(MSBuildCommunityTasksPath)' == ''">$(NuGetPackagesDir)MSBuildTasks.1.4.0.45\tools\</MSBuildCommunityTasksPath>
+		<MSBuildCommunityTasksLib>$(MSBuildCommunityTasksPath)MSBuild.Community.Tasks.dll</MSBuildCommunityTasksLib>
+	</PropertyGroup>
+	<UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.RoboCopy" />
+
+	<!--*******************************************************************************************
+	    MSBuild.Tasks.NUnit
+		This NUnit task is being used as it allows any available copy of NUnit (any version) 
+		to be used within MSBuild. This is preferred over the NUnit task in MSBuild.Community.Tasks.
+	    *******************************************************************************************-->
+	<UsingTask AssemblyFile="$(BuildDir)MSBuild.NUnit.dll" TaskName="MSBuild.Tasks.NUnit" />
+
+<!--
+***************************************************************************************************
+***************************************************************************************************
+	Section: Project Referneces to Clean/Build/Rebiuld/RunTests with Metadata Item Group
+***************************************************************************************************
+***************************************************************************************************
+-->
+	<ItemGroup>
+		<ProjectReference Include="$(RootDir)Speedioc\Speedioc.csproj">
+			<BinSourceDir>$(ProjectsOutDir)Speedioc\</BinSourceDir>
+			<OutDir>$(ProjectsOutDir)Speedioc\</OutDir>
+		</ProjectReference>
+		<ProjectReference Include="$(RootDir)Speedioc.Tests\Speedioc.Tests.csproj">
+			<BinSourceDir>$(ProjectsOutDir)Speedioc\</BinSourceDir>
+			<OutDir>$(ProjectsOutDir)Speedioc.Tests\</OutDir>
+		</ProjectReference>
+	</ItemGroup>
+
+<!--
+***************************************************************************************************
+***************************************************************************************************
+	Section: Main Targets: Clean, Build, Rebuild, RunTests
+***************************************************************************************************
+***************************************************************************************************
+-->
+	<!--*******************************************************************************************
+	    Target: Clean
+	    *******************************************************************************************-->
+	<Target Name="Clean">
+		<!-- Need a better, smarter recursive 'Remove Directory' MSBuild task.
+		     Until it arrives, just make multiple calls to RemoveDir with ContinueOnError='true' on each call except the last one.
+			 This hadles edge cases where not everything is completely removed on the first call or two (or three).
+			 This is pretty lame, but it works.
+		-->
+		<RemoveDir Directories="$(OutDir)" ContinueOnError="true" />
+		<RemoveDir Directories="$(OutDir)" ContinueOnError="true" />
+		<RemoveDir Directories="$(OutDir)" ContinueOnError="true" />
+		<RemoveDir Directories="$(OutDir)" />
+		<MSBuild 
+			Projects="@(ProjectReference)" 
+			Targets="Clean" 
+			Properties="OutDir=%(ProjectReference.OutDir)" 
+			/>
+	</Target>
+
+	<!--*******************************************************************************************
+	    Target: Build
+	    *******************************************************************************************-->
+	<Target Name="Build">
+		<CallTarget Targets="MakeDirs" />
+		<MSBuild 
+			Projects="@(ProjectReference)" 
+			Properties="SolutionDir=$(RootDir); OutDir=%(ProjectReference.OutDir); PostBuildEventUseInBuild=false" 
+			/>
+		<CallTarget Targets="CopyBinFiles" />
+		<CallTarget Targets="CopyBinDepFiles" />
+	</Target>
+
+	<!--*******************************************************************************************
+	    Target: Rebuild
+	    *******************************************************************************************-->
+	<Target Name="Rebuild">
+		<CallTarget Targets="MakeDirs" />
+		<MSBuild 
+			Projects="@(ProjectReference)" 
+			Targets="Rebuild" 
+			Properties="SolutionDir=$(RootDir); OutDir=%(ProjectReference.OutDir); PostBuildEventUseInBuild=false" 
+			/>
+		<CallTarget Targets="CopyBinFiles" />
+		<CallTarget Targets="CopyBinDepFiles" />
+	</Target>
+
+	<!--*******************************************************************************************
+	    Target: RunTests
+	    *******************************************************************************************-->
+	<Target Name="RunTests" Condition="'$(ShouldRunTests)' == 'true'">
+		<CallTarget Targets="PatchNUnitConsoleConfigFile" />
+		
+		<CreateItem Include="$(TestsOutDir)**\*.Tests.dll">
+			<Output ItemName="TestAssemblies" TaskParameter="Include"></Output>
+		</CreateItem>
+		<Message Text="Preparing to run NUnit tests in the following assemblies: @(TestAssemblies)" />
+		
+		<NUnit
+			Assemblies="@(TestAssemblies)"
+			ContinueOnError="false"
+			DisableShadowCopy="true"
+			Force32Bit="false"
+			FrameworkToUse="net-4.0"
+			HideDots="true"
+			ProcessModel="Single"
+			ProjectConfiguration="$(Configuration)"
+			ToolPath="$(NUnitToolPath)"
+			WorkingDirectory="$(OutDir)"
+			/>
+	</Target>
+
+<!--
+***************************************************************************************************
+***************************************************************************************************
+	Section: Utility Targets
+***************************************************************************************************
+***************************************************************************************************
+-->
+	<!--*******************************************************************************************
+		Target: CopyBinFiles
+	    *******************************************************************************************-->
+	<Target Name="CopyBinFiles">
+		<CreateItem Include="%(ProjectReference.BinSourceDir)Speedioc.*.*" Exclude="%(ProjectReference.BinSourceDir)Speedioc.*.Test*.*">
+			<Output ItemName="BinFiles" TaskParameter="Include"></Output>
+		</CreateItem>
+		<Copy SourceFiles="@(BinFiles)" DestinationFolder="$(BinDir)" ContinueOnError="true" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="true" />
+	</Target>
+
+	<!--*******************************************************************************************
+		Target: CopyBinDepFiles
+	    *******************************************************************************************-->
+	<Target Name="CopyBinDepFiles">
+		<CreateItem Include="%(ProjectReference.BinSourceDir)*.*" Exclude="%(ProjectReference.BinSourceDir)Speedioc.*.Test*.*">
+			<Output ItemName="BinDepFiles" TaskParameter="Include"></Output>
+		</CreateItem>
+		<Copy SourceFiles="@(BinDepFiles)" DestinationFolder="$(BinDepDir)" ContinueOnError="true" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="true" />
+	</Target>
+
+	<!--*******************************************************************************************
+		Target: MakeDirs
+	    *******************************************************************************************-->
+	<Target Name="MakeDirs">
+		<MakeDir Directories="@(DirsToMake)" />
+	</Target>
+	
+	<!--*******************************************************************************************
+		Target: PatchNUnitConsoleConfigFile
+	    *******************************************************************************************-->
+	<Target Name="PatchNUnitConsoleConfigFile">
+		<Message Text="Patching nunit-console.exe.config to ensure test support for .NET 4.0\4.5" />
+		<Copy 
+			SourceFiles="$(RootDir)Speedioc.Tests\Misc\NUnit\nunit-console.exe.config" 
+			DestinationFolder="$(NUnitToolPath)" 
+			ContinueOnError="true" 
+			OverwriteReadOnlyFiles="true" 
+			SkipUnchangedFiles="false" 
+			/>
+	</Target>
+</Project>

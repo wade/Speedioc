@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Speedioc", "Speedioc\Speedioc.csproj", "{24A05CDE-5A04-4278-BEB7-4A76A38253CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Speedioc.Tests", "Speedioc.Tests\Speedioc.Tests.csproj", "{932EE47C-C64A-43F1-A4C5-435926516A80}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B35AB12F-1FF5-404A-B621-DE1E7AED0DBC}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{06FC94BC-6C47-4975-BD77-8F4B15A98CEB}"
+	ProjectSection(SolutionItems) = preProject
+		.build\build.bat = .build\build.bat
+		.build\build.proj = .build\build.proj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuspec", ".nuspec", "{41D34410-95AD-454A-A9F7-04D83C8E8A2C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuspec\Speedioc.nuspec = .nuspec\Speedioc.nuspec
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5B65A929-EC51-4D42-BB20-73B936214439}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{24A05CDE-5A04-4278-BEB7-4A76A38253CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24A05CDE-5A04-4278-BEB7-4A76A38253CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24A05CDE-5A04-4278-BEB7-4A76A38253CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24A05CDE-5A04-4278-BEB7-4A76A38253CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{932EE47C-C64A-43F1-A4C5-435926516A80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{932EE47C-C64A-43F1-A4C5-435926516A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{932EE47C-C64A-43F1-A4C5-435926516A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{932EE47C-C64A-43F1-A4C5-435926516A80}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

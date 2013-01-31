@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{24A05CDE-5A04-4278-BEB7-4A76A38253CB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Speedioc</RootNamespace>
+    <AssemblyName>Speedioc</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeGeneration\GeneratedContainerBulider.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\SettableMemberInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\FieldInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\NamedHandlerSubMapCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\RegistrationCodeGenerationResult.cs" />
+    <Compile Include="CodeGeneration\ContainerGenerator.cs" />
+    <Compile Include="CodeGeneration\IContainerGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\IInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\MethodInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\CoreMemberInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\ParameterInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\ParameterInjectionCodeGeneratorResult.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\PropertyInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\MemberInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\AppDomainLifetimeRegistrationCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\RegistrationCodeGeneratorBase.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\ConstructorInjectionCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\IRegistrationCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\Indentations.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\ContainerLifetimeRegistrationCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\ThreadLifetimeRegistrationCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\IndependentLifetimeRegistrationCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\LiteralValueCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\TemplateCodeGenTokens.cs" />
+    <Compile Include="ContainerSettings.cs" />
+    <Compile Include="Core\Handler.cs" />
+    <Compile Include="Core\IRegistrationAggregator.cs" />
+    <Compile Include="Core\RegistrationAggregator.cs" />
+    <Compile Include="Core\RegistrationKeyGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\TemplateRegistrationMetadata.cs" />
+    <Compile Include="Core\IMethodNameGenerator.cs" />
+    <Compile Include="Core\IRegistrationMetadata.cs" />
+    <Compile Include="Core\MethodNameGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\TemplateContainerGenerator.cs" />
+    <Compile Include="Core\AppDomainLifetimeAnchor.cs" />
+    <Compile Include="Core\ContainerBase.cs" />
+    <Compile Include="Core\DefaultContainerSettings.cs" />
+    <Compile Include="Core\Operation.cs" />
+    <Compile Include="Core\RegistrationMetadata.cs" />
+    <Compile Include="Core\OverriddenRegistration.cs" />
+    <Compile Include="Core\RegistrationType.cs" />
+    <Compile Include="Core\SkippedRegistration.cs" />
+    <Compile Include="Core\SkippedRegistrationReason.cs" />
+    <Compile Include="Core\Typed.cs" />
+    <Compile Include="Core\Utilities\IdentifierHelper.cs" />
+    <Compile Include="Core\Utilities\ResourceUtility.cs" />
+    <Compile Include="DefaultContainerBuilderFactory.cs" />
+    <Compile Include="IContainer.cs" />
+    <Compile Include="IContainerBuilder.cs" />
+    <Compile Include="IContainerSettings.cs" />
+    <Compile Include="Lifetime.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Registration\Builders\FieldBuilder.cs" />
+    <Compile Include="Registration\Builders\IFieldBuilder.cs" />
+    <Compile Include="Registration\Core\Constructor.cs" />
+    <Compile Include="Registration\Builders\ConstructorBuilder.cs" />
+    <Compile Include="Registration\Core\INamedMember.cs" />
+    <Compile Include="Registration\Core\IValueMember.cs" />
+    <Compile Include="Registration\Core\IValueFactoryMember.cs" />
+    <Compile Include="Registration\Core\IResolvedMember.cs" />
+    <Compile Include="Registration\Core\ValueField.cs" />
+    <Compile Include="Registration\Core\ValueFactoryField.cs" />
+    <Compile Include="Registration\Core\ResolvedField.cs" />
+    <Compile Include="Registration\Core\IResolvedField.cs" />
+    <Compile Include="Registration\Core\IValueFactoryField.cs" />
+    <Compile Include="Registration\Core\IValueField.cs" />
+    <Compile Include="Registration\Core\IField.cs" />
+    <Compile Include="Registration\Core\ValueFactoryProperty.cs" />
+    <Compile Include="Registration\Core\ValueFactoryParameter.cs" />
+    <Compile Include="Registration\Core\IValueFactoryParameter.cs" />
+    <Compile Include="Registration\Core\IValueFactoryProperty.cs" />
+    <Compile Include="Registration\Core\IConstructor.cs" />
+    <Compile Include="Registration\Core\IMember.cs" />
+    <Compile Include="Registration\Builders\IMemberSignatureBuilder.cs" />
+    <Compile Include="Registration\Core\IMethod.cs" />
+    <Compile Include="Registration\Core\IParameter.cs" />
+    <Compile Include="Registration\Core\IProperty.cs" />
+    <Compile Include="Registration\Builders\IPropertyBuilder.cs" />
+    <Compile Include="Registration\IRegistrar.cs" />
+    <Compile Include="Registration\Core\IRegistration.cs" />
+    <Compile Include="Registration\Builders\IRegistrationBuilder.cs" />
+    <Compile Include="Registration\Core\IRegistrationData.cs" />
+    <Compile Include="Registration\IRegistry.cs" />
+    <Compile Include="Registration\Core\IResolvedParameter.cs" />
+    <Compile Include="Registration\Core\IResolvedProperty.cs" />
+    <Compile Include="Registration\Core\IValueParameter.cs" />
+    <Compile Include="Registration\Core\IValueProperty.cs" />
+    <Compile Include="Registration\Builders\MemberSignatureBuilder.cs" />
+    <Compile Include="Registration\Core\Method.cs" />
+    <Compile Include="Registration\Builders\MethodBuilder.cs" />
+    <Compile Include="Registration\Builders\PropertyBuilder.cs" />
+    <Compile Include="Registration\Registrar.cs" />
+    <Compile Include="Registration\Builders\RegistrationBuilder.cs" />
+    <Compile Include="Registration\Registry.cs" />
+    <Compile Include="Registration\Core\ResolvedParameter.cs" />
+    <Compile Include="Registration\Core\ResolvedProperty.cs" />
+    <Compile Include="Registration\Core\ValueParameter.cs" />
+    <Compile Include="Registration\Core\ValueProperty.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="CodeGeneration\TemplateCodeGen\Resources\GeneratedContainerClassTemplate.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
