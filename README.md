@@ -3,6 +3,7 @@
 A lightweight, high performance, experimental IoC container for .NET
 
 STATUS: **Experimental**
+Breaking changes may occur in the future.
 
 NuGet Package
 -------------
@@ -56,4 +57,25 @@ At this time, it does not support:
 - Resolving all instances of a type. This has not been implemented.
 - There is no support for configuration files of any kind. 
   All configuration and type registration is programmatic.
+- There's no automatic wire-up of abstractions to concretions.
+- There's no automatic discovery of registries.
 
+As previously stated, Speedioc is *experimental* at this time. 
+This does mean that future versions may have significant breaking changes. 
+
+Some of the code base that is expected to change and/or break include:
+
+- The Registration API
+- The Lifetime subsystem
+
+
+Getting Started
+---------------
+
+You can quickly install Speedioc into your project using the NuGet package.
+To install Speedioc, run the following command in the Package Manager Console:
+
+`PM> Install-Package Speedioc`
+
+For examples of how to begin using Speedioc, see the Examples\QuickStartSampleApp 
+project in the Speedioc source code.

@@ -40,6 +40,7 @@
     <Compile Include="Domain\BlackColor.cs" />
     <Compile Include="Domain\BlueColor.cs" />
     <Compile Include="Domain\Car.cs" />
+    <Compile Include="Domain\Color.cs" />
     <Compile Include="Domain\ColorScheme.cs" />
     <Compile Include="Domain\BoringCar.cs" />
     <Compile Include="Domain\Motorcycle.cs" />

@@ -54,6 +54,7 @@ ipch/
 
 # ReSharper is a .NET coding add-in
 _ReSharper*
+*.DotSettings
 
 # NCrunch
 *.ncrunch*
@@ -100,6 +101,8 @@ ClientBin
 ~$*
 *.dbmdl
 Generated_Code #added for RIA/Silverlight projects
+*.lnk
+*.cmd
 
 # Backup & report files from converting an old project file to a newer
 # Visual Studio version. Backup files are not needed, because we have git ;-)
