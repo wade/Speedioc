@@ -18,16 +18,16 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 		private const string TemplateResourceName = "Speedioc.CodeGeneration.TemplateCodeGen.Resources.GeneratedContainerClassTemplate.txt";
 
 		private readonly Dictionary<string, Func<TemplateRegistrationMetadata, Type, IRegistrationCodeGenerator>> _codeGeneratorMethodMap;
-		private readonly Dictionary<string, TemplateRegistrationMetadata> _metadataMap;
-		private readonly List<OverriddenRegistration> _overriddenRegistrations;
-		private readonly List<SkippedRegistration> _skippedRegistrations;
 		private readonly Dictionary<string, Assembly> _referencedAssemblies;
 
-		private readonly Dictionary<Type, string> _namedHandlerMapEntries;
-		private readonly Dictionary<Type, string> _namedTypedHandlerMapEntries;
+		private readonly Dictionary<Type, GeneratedCodeItem> _namedHandlerMapEntries;
+		private readonly Dictionary<Type, GeneratedCodeItem> _namedTypedHandlerMapEntries;
 
-		private readonly Dictionary<Type, List<string>> _namedHandlerSubMapEntries;
-		private readonly Dictionary<Type, List<string>> _namedTypedHandlerSubMapEntries;
+		private readonly Dictionary<Type, List<GeneratedCodeItem>> _namedHandlerSubMapEntries;
+		private readonly Dictionary<Type, List<GeneratedCodeItem>> _namedTypedHandlerSubMapEntries;
+
+		private List<TemplateRegistrationMetadata> _metadataList;
+		private Dictionary<string, TemplateRegistrationMetadata> _metadataMap;
 
 		private StringBuilder _handlerMapEntriesCodeBlockStringBuilder;
 		private StringBuilder _handlerMapTypedEntriesCodeBlockStringBuilder;
@@ -42,13 +42,10 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 		public TemplateContainerGenerator()
 		{
 			_codeGeneratorMethodMap = InitializeCodeGeneratorMethodMap();
-			_metadataMap = new Dictionary<string, TemplateRegistrationMetadata>();
-			_namedHandlerMapEntries = new Dictionary<Type, string>();
-			_namedTypedHandlerMapEntries = new Dictionary<Type, string>();
-			_namedHandlerSubMapEntries = new Dictionary<Type, List<string>>();
-			_namedTypedHandlerSubMapEntries = new Dictionary<Type, List<string>>();
-			_overriddenRegistrations = new List<OverriddenRegistration>();
-			_skippedRegistrations = new List<SkippedRegistration>();
+			_namedHandlerMapEntries = new Dictionary<Type, GeneratedCodeItem>();
+			_namedTypedHandlerMapEntries = new Dictionary<Type, GeneratedCodeItem>();
+			_namedHandlerSubMapEntries = new Dictionary<Type, List<GeneratedCodeItem>>();
+			_namedTypedHandlerSubMapEntries = new Dictionary<Type, List<GeneratedCodeItem>>();
 			_referencedAssemblies = InitializeReferencedAssemblies();
 		}
 
@@ -103,6 +100,10 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 
 		private void ProcessRegistrations()
 		{
+			int registrationsCount = Registrations.Count;
+			_metadataList = new List<TemplateRegistrationMetadata>(registrationsCount);
+			_metadataMap = new Dictionary<string, TemplateRegistrationMetadata>(registrationsCount);
+
 			int index = -1;
 			foreach (IRegistration registration in Registrations)
 			{
@@ -134,13 +135,16 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 							TypeKey = typeKey
 						};
 
+				_metadataList.Add(metadata);
+
 				var codeGenerationResult = GenerateGetInstanceCodeForRegistration(metadata);
 				if (codeGenerationResult != RegistrationCodeGenerationResult.Successful)
 				{
 					continue;
 				}
 
-				UpdateMetadataMap(registrationKey, metadata);
+				CheckForMetadataOverride(registrationKey, metadata);
+				_metadataMap[registrationKey] = metadata;
 			}
 		}
 
@@ -156,8 +160,19 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 			GenerateAndAppendNamedHandlerMapCode();
 			GenerateAndAppendNamedHandlerSubMapCode();
 
-			foreach (TemplateRegistrationMetadata metadata in _metadataMap.Values)
+			foreach (TemplateRegistrationMetadata metadata in _metadataList)
 			{
+				string membersCommentBlock = metadata.MembersCommentBlock;
+				if (false == string.IsNullOrWhiteSpace(membersCommentBlock))
+				{
+					_memebrsCodeBlockStringBuilder.Append(membersCommentBlock);
+				}
+
+				if (metadata.ShouldSkip)
+				{
+					continue;
+				}
+
 				string membersCodeBlock = metadata.MembersCodeBlock;
 				if (false == string.IsNullOrWhiteSpace(membersCodeBlock))
 				{
@@ -365,16 +380,13 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 
 			if (false == _codeGeneratorMethodMap.TryGetValue(metadata.CodeGeneratorMethodKey, out func))
 			{
-				// Could not find a code generator delegate.
-				// Skip this registration.
-				_skippedRegistrations.Add(
-					new SkippedRegistration(
-						SkippedRegistrationReason.NoCodeGenerator,
-						string.Format(
-							"The code generator delegate was not found for the CodeGeneratorMethodKey '{0}'."
-							, metadata.CodeGeneratorMethodKey),
-						metadata)
-					);
+				metadata.ShouldSkip = true;
+				metadata.SkippedReason = SkippedRegistrationReason.NoCodeGenerator;
+				metadata.SkippedReasonDescription =
+					string.Format(
+						"The code generator delegate was not found for the CodeGeneratorMethodKey '{0}'."
+						, metadata.CodeGeneratorMethodKey);
+				UpdateSkippedRegistrationComments(metadata);
 				return RegistrationCodeGenerationResult.Skipped;
 			}
 
@@ -383,32 +395,19 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 			return RegistrationCodeGenerationResult.Successful;
 		}
 
-		private void UpdateMetadataMap(string key, TemplateRegistrationMetadata metadata)
+		private void CheckForMetadataOverride(string key, TemplateRegistrationMetadata metadata)
 		{
-			// Track occurrences where the current registration overrides (replaces) an 
-			// existing registration. This is used for debugging, logging and informational purposes.
-			if (_metadataMap.ContainsKey(key))
+			if (false == _metadataMap.ContainsKey(key))
 			{
-				IRegistrationMetadata oldMetadata = _metadataMap[key];
-
-				OverriddenRegistration overriddenRegistration =
-					new OverriddenRegistration(oldMetadata, metadata);
-
-				SkippedRegistration skippedRegistration =
-					new SkippedRegistration(
-						SkippedRegistrationReason.Overridden,
-						"The registration was overridden by another registration.",
-						oldMetadata,
-						overriddenRegistration);
-
-				_overriddenRegistrations.Add(overriddenRegistration);
-				_skippedRegistrations.Add(skippedRegistration);
-				_metadataMap[key] = metadata;
+				return;
 			}
-			else
-			{
-				_metadataMap.Add(key, metadata);
-			}
+
+			TemplateRegistrationMetadata oldMetadata = _metadataMap[key];
+			oldMetadata.OverriddenBy = metadata;
+			oldMetadata.ShouldSkip = true;
+			oldMetadata.SkippedReason = SkippedRegistrationReason.Overridden;
+			oldMetadata.SkippedReasonDescription = "The registration was overridden by another registration.";
+			UpdateSkippedRegistrationComments(oldMetadata);
 		}
 
 		#endregion " Methods That Direct Code Generation "
@@ -454,13 +453,16 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 
 		private void GenerateAndAppendNamedHandlerMapCode()
 		{
-			Dictionary<Type, string>[] maps = new[] {_namedHandlerMapEntries, _namedTypedHandlerMapEntries};
+			Dictionary<Type, GeneratedCodeItem>[] maps = new[] { _namedHandlerMapEntries, _namedTypedHandlerMapEntries };
 			foreach (var map in maps)
 			{
 				foreach (Type type in map.Keys)
 				{
-					string item = map[type];
-					_namedHandlerMapEntriesCodeBlockStringBuilder.Append(item);
+					GeneratedCodeItem item = map[type];
+					if (false == item.Metadata.ShouldSkip)
+					{
+						_namedHandlerMapEntriesCodeBlockStringBuilder.Append(item.Code);
+					}
 				}
 			}
 		}
@@ -474,6 +476,53 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 					_preCreateInstanceCodeBlockStringBuilder,
 					_createNamedHandlerSubMapMembersCodeBlockStringBuilder);
 			codeGenerator.Generate();
+		}
+
+		private void UpdateSkippedRegistrationComments(TemplateRegistrationMetadata metadata)
+		{
+			const string indent = Indentations.MemberIndent;
+			StringBuilder sb = new StringBuilder(metadata.MembersCommentBlock, metadata.MembersCommentBlock.Length + 500);
+
+			sb.Append(indent);
+			sb.Append("// Skip This Registration .............: ");
+			sb.Append(metadata.ShouldSkip);
+			sb.AppendLine();
+
+			sb.Append(indent);
+			sb.Append("// Skipped Reason .....................: ");
+			sb.Append(metadata.SkippedReason);
+			sb.AppendLine();
+
+			sb.Append(indent);
+			sb.Append("// Skipped Reason Description .........: ");
+			sb.Append(metadata.SkippedReasonDescription);
+			sb.AppendLine();
+
+			if (null != metadata.OverriddenBy)
+			{
+				sb.Append(indent);
+				sb.Append("// Overridden By Registration Index ...: ");
+				sb.Append(metadata.OverriddenBy.Index);
+				sb.AppendLine();
+			}
+
+			sb.Append(indent);
+			sb.Append("// ");
+			sb.Append(new string('-', 80));
+			sb.AppendLine();
+
+			sb.Append(indent);
+			sb.Append("// NOTE: There is no code generated for this skipped registration.");
+			sb.AppendLine();
+
+			sb.Append(indent);
+			sb.Append("// ");
+			sb.Append(new string('-', 80));
+			sb.AppendLine();
+
+			sb.AppendLine(); // Blank line to separate from next member
+
+			metadata.MembersCommentBlock = sb.ToString();
 		}
 	}
 }

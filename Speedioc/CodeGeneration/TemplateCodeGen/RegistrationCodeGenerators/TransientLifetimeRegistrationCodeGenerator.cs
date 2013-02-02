@@ -12,9 +12,11 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 
 		public override void Generate()
 		{
+			StringBuilder commentsStringBuilder = new StringBuilder(1000);
 			StringBuilder membersStringBuilder = new StringBuilder(2000);
 
-			AppendCommentBlock(membersStringBuilder, Metadata);
+			AppendCommentBlock(commentsStringBuilder, Metadata);
+			Metadata.MembersCommentBlock = commentsStringBuilder.ToString();
 
 			AppendMethod(
 				membersStringBuilder,

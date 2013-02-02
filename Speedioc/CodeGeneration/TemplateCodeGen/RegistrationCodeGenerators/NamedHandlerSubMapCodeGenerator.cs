@@ -7,14 +7,14 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 {
 	public class NamedHandlerSubMapCodeGenerator : RegistrationCodeGeneratorBase
 	{
-		private readonly Dictionary<Type, List<string>> _namedHandlerSubMapEntries;
-		private readonly Dictionary<Type, List<string>> _namedTypedHandlerSubMapEntries;
+		private readonly Dictionary<Type, List<GeneratedCodeItem>> _namedHandlerSubMapEntries;
+		private readonly Dictionary<Type, List<GeneratedCodeItem>> _namedTypedHandlerSubMapEntries;
 		private readonly StringBuilder _preCreateInstanceCodeBlockStringBuilder;
 		private readonly StringBuilder _codeBlockStringBuilder;
 
 		public NamedHandlerSubMapCodeGenerator(
-			Dictionary<Type, List<string>> namedHandlerSubMapEntries, 
-			Dictionary<Type, List<string>> namedTypedHandlerSubMapEntries, 
+			Dictionary<Type, List<GeneratedCodeItem>> namedHandlerSubMapEntries,
+			Dictionary<Type, List<GeneratedCodeItem>> namedTypedHandlerSubMapEntries, 
 			StringBuilder preCreateInstanceCodeBlockStringBuilder,
 			StringBuilder codeBlockStringBuilder)
 			: base(null, null, null)
@@ -43,7 +43,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			GenerateMembers(prefix, _namedTypedHandlerSubMapEntries);
 		}
 
-		private void GenerateMembers(string prefix, Dictionary<Type, List<string>> entries)
+		private void GenerateMembers(string prefix, Dictionary<Type, List<GeneratedCodeItem>> entries)
 		{
 			if (null == entries || entries.Count < 1)
 			{
@@ -57,7 +57,12 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 
 			foreach (Type type in entries.Keys)
 			{
-				List<string> list = entries[type];
+				List<GeneratedCodeItem> list = entries[type];
+
+				if (false == ShouldGenerate(list))
+				{
+					continue;
+				}
 
 				string fieldName = GenerateFieldName(prefix, type);
 				string methodName = string.Format("Create{0}", fieldName);
@@ -92,7 +97,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			return IdentifierHelper.MakeSafeIdentifier(string.Format("{0}__{1}__{2}", prefix, assemblyName, fullTypeName));
 		}
 
-		private void GenerateMethodBody(StringBuilder sb, string fieldName, string declaredType, ICollection<string> list)
+		private void GenerateMethodBody(StringBuilder sb, string fieldName, string declaredType, ICollection<GeneratedCodeItem> list)
 		{
 			const string indent1 = Indentations.MemberBodyIndent;
 			const string indent2 = indent1 + Indentations.Indent;
@@ -113,9 +118,13 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			sb.AppendLine();
 
 			StringBuilder sb2 = new StringBuilder(list.Count * 400);
-			foreach (string item in list)
+			foreach (GeneratedCodeItem item in list)
 			{
-				sb2.Append(item);
+				if (item.Metadata.ShouldSkip)
+				{
+					continue;
+				}
+				sb2.Append(item.Code);
 			}
 			sb.Append(sb2.ToString().TrimEnd());
 
@@ -123,6 +132,22 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			sb.Append(indent3);
 			sb.Append("};");
 			sb.AppendLine();
+		}
+
+		private bool ShouldGenerate(List<GeneratedCodeItem> list)
+		{
+			if (null != list && list.Count > 0)
+			{
+				foreach (GeneratedCodeItem item in list)
+				{
+					// If only one item is enabled for generation, short-circuit this method and return true.
+					if (false == item.Metadata.ShouldSkip)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	}
 }

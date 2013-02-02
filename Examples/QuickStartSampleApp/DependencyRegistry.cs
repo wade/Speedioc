@@ -249,9 +249,9 @@ namespace QuickStartSampleApp
 				.UsingConstructor()
 					.WithValueFactoryParameter<IColor>(() => new RedColor())
 					.AsLastParameter()
-				.WithName("Red-3");
+				.WithName("Red-2");
 
-			// The example above produces the exact same registration as the previous example (but with a different name).
+			// The example above produces the exact same registration as the previous example.
 			// You'll notice the the order of the method chaining is different. The purpose of this example 
 			// is to illustrate the many of the clauses (methods) may be specified in any order an to also 
 			// show how the context switch to that of the constructor and then back to the original registration 

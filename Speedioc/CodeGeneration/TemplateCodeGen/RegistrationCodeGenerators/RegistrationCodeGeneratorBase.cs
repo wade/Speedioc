@@ -46,12 +46,12 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			sb.AppendLine();
 
 			sb.Append(indent);
-			sb.Append("// Registration Index ...........: ");
+			sb.Append("// Registration Index .................: ");
 			sb.Append(metadata.Index);
 			sb.AppendLine();
 
 			sb.Append(indent);
-			sb.Append("// Registration Key .............: ");
+			sb.Append("// Registration Key ...................: ");
 			sb.Append("\"");
 			sb.Append(metadata.RegistrationKey);
 			sb.Append("\"");
@@ -60,36 +60,36 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			IRegistration registration = metadata.Registration;
 
 			sb.Append(indent);
-			sb.Append("// Concrete Type ................: ");
+			sb.Append("// Concrete Type ......................: ");
 			sb.Append(registration.ConcreteType.AssemblyQualifiedName);
 			sb.AppendLine();
 
 			string mappedTypeFullName = (null == registration.MappedType) ? notSpecified : registration.MappedType.AssemblyQualifiedName;
 
 			sb.Append(indent);
-			sb.Append("// Mapped Type ..................: ");
+			sb.Append("// Mapped Type ........................: ");
 			sb.Append(mappedTypeFullName);
 			sb.AppendLine();
 
 			string registeredName = string.IsNullOrEmpty(registration.Name) ? notSpecified : registration.Name;
 
 			sb.Append(indent);
-			sb.Append("// Registered Name ..............: ");
+			sb.Append("// Registered Name ....................: ");
 			sb.Append(registeredName);
 			sb.AppendLine();
 
 			sb.Append(indent);
-			sb.Append("// Lifetime .....................: ");
+			sb.Append("// Lifetime ...........................: ");
 			sb.Append(registration.Lifetime);
 			sb.AppendLine();
 
 			sb.Append(indent);
-			sb.Append("// Operation ....................: ");
+			sb.Append("// Operation ..........................: ");
 			sb.Append(registration.Operation);
 			sb.AppendLine();
 
 			sb.Append(indent);
-			sb.Append("// Should Pre-Create Instance ...: ");
+			sb.Append("// Should Pre-Create Instance .........: ");
 			sb.Append(registration.ShouldPreCreateInstance);
 			sb.AppendLine();
 
@@ -97,7 +97,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			bool isConstructorRegistered = (null != constructor);
 
 			sb.Append(indent);
-			sb.Append("// Is Constructor Registered ....: ");
+			sb.Append("// Is Constructor Registered ..........: ");
 			sb.Append(isConstructorRegistered);
 			sb.AppendLine();
 
@@ -106,7 +106,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 				int constructorParameterCount = (null == constructor.Parameters) ? 0 : constructor.Parameters.Count;
 
 				sb.Append(indent);
-				sb.Append("// Constructor Parmeter Count ...: ");
+				sb.Append("// Constructor Parmeter Count .........: ");
 				sb.Append(constructorParameterCount);
 				sb.AppendLine();
 
@@ -115,7 +115,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 					int index = 0;
 					foreach (IParameter parameter in constructor.Parameters)
 					{
-						string dots = new string('.', 14 - index.ToString(CultureInfo.InvariantCulture).Length);
+						string dots = new string('.', 20 - index.ToString(CultureInfo.InvariantCulture).Length);
 						string parameterDescription = string.Format("//     Parameter[{0}] {1}: ", index, dots);
 
 						sb.Append(indent);
@@ -251,7 +251,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 		protected void GenerateCodeForNamedHandlerMapEntry(Type dependencyType, string dependencyName, string methodName, bool typed = false, string instanceFieldName = null)
 		{
 			Type key = dependencyType;
-			Dictionary<Type, string> map = typed ? Metadata.NamedTypedHandlerMapEntries : Metadata.NamedHandlerMapEntries;
+			Dictionary<Type, GeneratedCodeItem> map = typed ? Metadata.NamedTypedHandlerMapEntries : Metadata.NamedHandlerMapEntries;
 			if (false == map.ContainsKey(key))
 			{
 				string keyType = typed ? string.Format("Typed<{0}>", dependencyType.FullName) : dependencyType.FullName;
@@ -263,7 +263,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 				string namedHandlerMapEntry = string.Format("{0}map.Add(typeof({1}), {2});{3}",
 					Indentations.MemberBodyIndent, keyType, fieldName, Environment.NewLine);
 
-				map.Add(key, namedHandlerMapEntry);
+				map.Add(key, new GeneratedCodeItem(Metadata, namedHandlerMapEntry));
 			}
 
 			// Sub map entry
@@ -277,19 +277,19 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.RegistrationCodeGenerators
 			string namedHandlerSubMapEntry = string.Format("{0}{{ \"{1}\", new Handler<{2}>({3}, new Func<{2}>({4})) }},{5}",
 				Indentations.HandlerMapKeyValuePairsIndent, dependencyName, funcType, instanceFieldName ?? "null", methodName, Environment.NewLine);
 
-			Dictionary<Type, List<string>> map = typed ? Metadata.NamedTypedHandlerSubMapEntries : Metadata.NamedHandlerSubMapEntries;
+			Dictionary<Type, List<GeneratedCodeItem>> map = typed ? Metadata.NamedTypedHandlerSubMapEntries : Metadata.NamedHandlerSubMapEntries;
 			AddValueToMap(map, dependencyType, namedHandlerSubMapEntry);
 		}
 
-		private void AddValueToMap(Dictionary<Type, List<string>> map, Type key, string value)
+		private void AddValueToMap(Dictionary<Type, List<GeneratedCodeItem>> map, Type key, string value)
 		{
-			List<string> list;
+			List<GeneratedCodeItem> list;
 			if (false == map.TryGetValue(key, out list))
 			{
-				list = new List<string>();
+				list = new List<GeneratedCodeItem>();
 				map.Add(key, list);
 			}
-			list.Add(value);
+			list.Add(new GeneratedCodeItem(Metadata, value));
 		}
 
 		protected string GenerareCodeForPreCreateInstanceCodeBlock(bool shouldPreCreateInstance, string createInstanceMethodName)

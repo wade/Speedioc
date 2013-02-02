@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGeneration\GeneratedContainerBulider.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\GeneratedCodeItem.cs" />
     <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\SettableMemberInjectionCodeGenerator.cs" />
     <Compile Include="CodeGeneration\TemplateCodeGen\InjectionCodeGenerators\FieldInjectionCodeGenerator.cs" />
     <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\NamedHandlerSubMapCodeGenerator.cs" />
@@ -56,7 +57,7 @@
     <Compile Include="CodeGeneration\TemplateCodeGen\Indentations.cs" />
     <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\ContainerLifetimeRegistrationCodeGenerator.cs" />
     <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\ThreadLifetimeRegistrationCodeGenerator.cs" />
-    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\IndependentLifetimeRegistrationCodeGenerator.cs" />
+    <Compile Include="CodeGeneration\TemplateCodeGen\RegistrationCodeGenerators\TransientLifetimeRegistrationCodeGenerator.cs" />
     <Compile Include="CodeGeneration\LiteralValueCodeGenerator.cs" />
     <Compile Include="CodeGeneration\TemplateCodeGen\TemplateCodeGenTokens.cs" />
     <Compile Include="ContainerSettings.cs" />

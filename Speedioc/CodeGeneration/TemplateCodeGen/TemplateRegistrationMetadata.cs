@@ -8,10 +8,10 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 	{
 		public TemplateRegistrationMetadata(
 			IMethodNameGenerator methodNameGenerator,
-			Dictionary<Type, string> namedHandlerMapEntries, 
-			Dictionary<Type, string> namedTypedHandlerMapEntries,
-			Dictionary<Type, List<string>> namedHandlerSubMapEntries, 
-			Dictionary<Type, List<string>> namedTypedHandlerSubMapEntries)
+			Dictionary<Type, GeneratedCodeItem> namedHandlerMapEntries,
+			Dictionary<Type, GeneratedCodeItem> namedTypedHandlerMapEntries,
+			Dictionary<Type, List<GeneratedCodeItem>> namedHandlerSubMapEntries,
+			Dictionary<Type, List<GeneratedCodeItem>> namedTypedHandlerSubMapEntries)
 			: base(methodNameGenerator)
 		{
 			NamedHandlerMapEntries = namedHandlerMapEntries;
@@ -27,13 +27,20 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 		public string HandlerMapTypedEntriesCodeBlock { get; set; }
 		public string InstanceFieldName { get; set; }
 		public string MembersCodeBlock { get; set; }
+		public string MembersCommentBlock { get; set; }
+		public TemplateRegistrationMetadata OverriddenBy { get; set; }
 		public string PreCreateInstanceCodeBlock { get; set; }
+
+		public bool ShouldSkip { get; set; }
+		public SkippedRegistrationReason SkippedReason { get; set; }
+		public string SkippedReasonDescription { get; set; }
+
 		public Type TypeKey { get; set; }
 
-		public Dictionary<Type, string> NamedHandlerMapEntries { get; set; }
-		public Dictionary<Type, string> NamedTypedHandlerMapEntries { get; set; }
+		public Dictionary<Type, GeneratedCodeItem> NamedHandlerMapEntries { get; set; }
+		public Dictionary<Type, GeneratedCodeItem> NamedTypedHandlerMapEntries { get; set; }
 
-		public Dictionary<Type, List<string>> NamedHandlerSubMapEntries { get; set; }
-		public Dictionary<Type, List<string>> NamedTypedHandlerSubMapEntries { get; set; }
+		public Dictionary<Type, List<GeneratedCodeItem>> NamedHandlerSubMapEntries { get; set; }
+		public Dictionary<Type, List<GeneratedCodeItem>> NamedTypedHandlerSubMapEntries { get; set; }
 	}
 }
