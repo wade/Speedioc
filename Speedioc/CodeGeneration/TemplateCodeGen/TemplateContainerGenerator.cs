@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -18,7 +17,6 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 		private const string TemplateResourceName = "Speedioc.CodeGeneration.TemplateCodeGen.Resources.GeneratedContainerClassTemplate.txt";
 
 		private readonly Dictionary<string, Func<TemplateRegistrationMetadata, Type, IRegistrationCodeGenerator>> _codeGeneratorMethodMap;
-		private readonly Dictionary<string, Assembly> _referencedAssemblies;
 
 		private readonly Dictionary<Type, GeneratedCodeItem> _namedHandlerMapEntries;
 		private readonly Dictionary<Type, GeneratedCodeItem> _namedTypedHandlerMapEntries;
@@ -46,7 +44,6 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 			_namedTypedHandlerMapEntries = new Dictionary<Type, GeneratedCodeItem>();
 			_namedHandlerSubMapEntries = new Dictionary<Type, List<GeneratedCodeItem>>();
 			_namedTypedHandlerSubMapEntries = new Dictionary<Type, List<GeneratedCodeItem>>();
-			_referencedAssemblies = InitializeReferencedAssemblies();
 		}
 
 		private Dictionary<string, Func<TemplateRegistrationMetadata, Type, IRegistrationCodeGenerator>> InitializeCodeGeneratorMethodMap()
@@ -57,31 +54,8 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 						{ "GetInstance|Transient", (m, t) => new TransientLifetimeRegistrationCodeGenerator(Settings, m, t) }, 
 						{ "GetInstance|AppDomain", (m, t) => new AppDomainLifetimeRegistrationCodeGenerator(Settings, m, t) }, 
 						{ "GetInstance|Container", (m, t) => new ContainerLifetimeRegistrationCodeGenerator(Settings, m, t) }, 
-						{ "GetInstance|Thread", (m, t) => new ThreadLifetimeRegistrationCodeGenerator(Settings, m, t) }, 
+						{ "GetInstance|Thread"   , (m, t) => new ThreadLifetimeRegistrationCodeGenerator   (Settings, m, t) }, 
 					};
-		}
-
-		private Dictionary<string, Assembly> InitializeReferencedAssemblies()
-		{
-			Dictionary<string, Assembly> dictionary = new Dictionary<string, Assembly>();
-
-			// mscorlib.dll
-			Assembly assembly = typeof(object).Assembly;
-			dictionary.Add(assembly.FullName, assembly);
-
-			// System.dll
-			assembly = typeof(Uri).Assembly;
-			dictionary.Add(assembly.FullName, assembly);
-
-			// System.Core.dll
-			assembly = typeof(IQueryProvider).Assembly;
-			dictionary.Add(assembly.FullName, assembly);
-
-			// Speedioc.dll
-			assembly = GetType().Assembly;
-			dictionary.Add(assembly.FullName, assembly);
-
-			return dictionary;
 		}
 
 		#endregion " Constructor and Initialization Methods "
@@ -261,77 +235,8 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 
 		private void CompileSourceCode()
 		{
-			string assemblyFilename = Settings.GeneratedContainerAssemblyPath;
-			if (File.Exists(assemblyFilename))
-			{
-				File.Delete(assemblyFilename);
-			}
-
-			CompilerParameters parameters = new CompilerParameters
-				{
-					CompilerOptions = "/optimize+",
-					OutputAssembly = assemblyFilename,
-					GenerateExecutable = false,
-					IncludeDebugInformation = Settings.IncludeDebugInfo,
-					TreatWarningsAsErrors = false
-				};
-
-			foreach (Assembly referencedAssembly in _referencedAssemblies.Values)
-			{
-				parameters.ReferencedAssemblies.Add(referencedAssembly.Location);
-			}
-
-			string filename = Settings.GeneratedContainerSourceCodeFilename;
-
-			bool shouldCompileFromFile =
-				Settings.SaveGeneratedSourceCodeToFile &&
-				false == string.IsNullOrWhiteSpace(filename) &&
-				File.Exists(filename);
-
-			CodeDomProvider codeProvider = 
-				CodeDomProvider.CreateProvider("CSharp", new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
-
-			CompilerResults results = 
-				shouldCompileFromFile
-					? codeProvider.CompileAssemblyFromFile(parameters, filename)
-					: codeProvider.CompileAssemblyFromSource(parameters, _template);
-
-			if (results.Errors.HasErrors)
-			{
-				int count = results.Errors.Count;
-				StringBuilder sb = new StringBuilder(1000 * count);
-
-				sb.Append(count);
-				sb.Append(" Compiler Error");
-				sb.Append(count != 1 ? "s" : string.Empty);
-				sb.Append(" Occurred:");
-				sb.AppendLine();
-
-				foreach (CompilerError error in results.Errors)
-				{
-					sb.Append("		");
-					sb.AppendLine(error.ToString());
-				}
-
-				sb.AppendLine("Container Settings");
-				sb.Append("    SaveGeneratedSourceCodeToFile ..........: "); sb.AppendLine(Settings.SaveGeneratedSourceCodeToFile.ToString());
-				sb.Append("    GeneratedContainerSourceCodeFilename ...: "); sb.AppendLine(Settings.GeneratedContainerSourceCodeFilename);
-
-				sb.AppendLine("Compiler Parameters");
-				sb.Append("    OutputAssembly ............: "); sb.AppendLine(parameters.OutputAssembly);
-				sb.Append("    IncludeDebugInformation ...: "); sb.AppendLine(parameters.IncludeDebugInformation.ToString());
-
-				sb.AppendLine("    Referenced Assemblies");
-				
-				foreach (string item in parameters.ReferencedAssemblies)
-				{
-					sb.Append("        Referenced Assembly .....: ");
-					sb.AppendLine(item);
-				}
-
-				// TODO: Fix this exception:
-				throw new Exception(sb.ToString());
-			}
+			var compiler = new ContainerCompiler(Settings, ReferencedAssemblies, _template);
+			compiler.Compile();
 		}
 
 		private IContainer CreateContainer()
@@ -361,9 +266,9 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 			{
 				Assembly assembly = type.Assembly;
 				string key = assembly.FullName;
-				if (false == _referencedAssemblies.ContainsKey(key))
+				if (false == ReferencedAssemblies.ContainsKey(key))
 				{
-					_referencedAssemblies.Add(key, assembly);
+					ReferencedAssemblies.Add(key, assembly);
 				}
 			}
 		}
@@ -418,8 +323,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 			Type concreteType = registration.ConcreteType;
 			if (null == concreteType)
 			{
-				// TODO: Fix this exception:
-				throw new Exception(string.Format("Invalid registration at index {0}: ConcreteType cannot be null.", index));
+				throw new RegistrationValidationException("Invalid registration at index {0}: ConcreteType cannot be null.", index);
 			}
 
 			// MappedType may be null.
@@ -429,8 +333,7 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen
 			{
 				if (false == mappedType.IsAssignableFrom(concreteType))
 				{
-					// TODO: Fix this exception:
-					throw new Exception(string.Format("Invalid registration at index {0}: ConcreteType '{1}' is not assignable to MappedType '{2}'. This is not a valid mapping. Please ensure that ConcreteType impelments, inherits from or is otherwise assignable to MappedType.", index, concreteType.FullName, mappedType.FullName));
+					throw new RegistrationValidationException("Invalid registration at index {0}: ConcreteType '{1}' is not assignable to MappedType '{2}'. This is not a valid mapping. Please ensure that ConcreteType impelments, inherits from or is otherwise assignable to MappedType.", index, concreteType.FullName, mappedType.FullName);
 				}
 			}
 		}

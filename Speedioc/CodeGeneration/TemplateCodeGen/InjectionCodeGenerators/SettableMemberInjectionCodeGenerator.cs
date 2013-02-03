@@ -76,8 +76,13 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.InjectionCodeGenerators
 
 			if (null == resolvedMember)
 			{
-				// TODO: Fix this exception:
-				throw new Exception("Cannot cast member as TResolvedMember.");
+				throw 
+					new ContainerGenerationException(
+						"The member parameter of type '{0}' is not a type of '{1}'. " 
+					  + "The resolved injection member cannot be generated."
+					  , typeof(TMember).FullName
+					  , typeof(TResolvedMember).FullName
+						);
 			}
 
 			string code =
@@ -99,8 +104,13 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.InjectionCodeGenerators
 
 			if (null == valueFactoryMember)
 			{
-				// TODO: Fix this exception:
-				throw new Exception("Cannot cast member as TValueFactoryMember.");
+				throw
+					new ContainerGenerationException(
+						"The member parameter of type '{0}' is not a type of '{1}'. "
+					  + "The value factory injection member cannot be generated."
+					  , typeof(TMember).FullName
+					  , typeof(TValueFactoryMember).FullName
+						);
 			}
 
 			string code =
@@ -124,8 +134,13 @@ namespace Speedioc.CodeGeneration.TemplateCodeGen.InjectionCodeGenerators
 
 			if (null == valueMember)
 			{
-				// TODO: Fix this exception:
-				throw new Exception("Cannot cast member as TValueMember.");
+				throw
+					new ContainerGenerationException(
+						"The member parameter of type '{0}' is not a type of '{1}'. "
+					  + "The value injection member cannot be generated."
+					  , typeof(TMember).FullName
+					  , typeof(TValueMember).FullName
+						);
 			}
 
 			string code =

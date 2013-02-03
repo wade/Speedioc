@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Speedioc.Core;
 using Speedioc.Registration.Core;
@@ -21,10 +22,12 @@ namespace Speedioc.CodeGeneration
 				throw new ArgumentException("The registrations argument cannot be empty.", "registrations");
 			}
 
+			ReferencedAssemblies = InitializeReferencedAssemblies();
 			Registrations = registrations;
 			Settings = settings ?? new DefaultContainerSettings("Speedioc");
-			AssemblyFilename = GetGeneratedAssemblyFilename();
-			FullTypeName = GetFullTypeName();
+			ValidateContainerSettings(Settings);  // Validate the settings before attempting to use them.
+			AssemblyFilename = Path.Combine(Settings.GeneratedContainerAssemblyLocation, Settings.GeneratedContainerAssemblyName + ".dll");
+			FullTypeName = string.Format("{0}.{1}", Settings.GeneratedContainerNamespace, Settings.GeneratedContainerClassName);
 
 			return
 				ShouldGenerateContainer()
@@ -40,76 +43,27 @@ namespace Speedioc.CodeGeneration
 
 		protected IContainerSettings Settings { get; set; }
 
+		protected Dictionary<string, Assembly> ReferencedAssemblies { get; set; }
+
 		protected IList<IRegistration> Registrations { get; set; }
-
-		private string GetFullTypeName()
-		{
-			string namespaceName = Settings.GeneratedContainerNamespace;
-			if (string.IsNullOrWhiteSpace(namespaceName))
-			{
-				throw new InvalidOperationException(
-					string.Format(
-						"The {0}.GeneratedContainerNamespace property value is null, empty or whitespace."
-					  , Settings.GetType().Name)
-					);
-			}
-
-			string className = Settings.GeneratedContainerClassName;
-			if (string.IsNullOrWhiteSpace(className))
-			{
-				throw new InvalidOperationException(
-					string.Format(
-						"The {0}.GeneratedContainerClassName property value is null, empty or whitespace."
-					  , Settings.GetType().Name)
-					);
-			}
-
-			return string.Format("{0}.{1}", namespaceName, className);
-		}
-
-		private string GetGeneratedAssemblyFilename()
-		{
-			string assemblyName = Settings.GeneratedContainerAssemblyName;
-			if (string.IsNullOrWhiteSpace(assemblyName))
-			{
-				throw new InvalidOperationException(
-					string.Format(
-						"The {0}.GeneratedContainerAssemblyName property value is null, empty or whitespace."
-					  , Settings.GetType().Name)
-					);
-			}
-
-			string directory = Settings.GeneratedContainerAssemblyLocation;
-			if (string.IsNullOrWhiteSpace(directory))
-			{
-				throw new InvalidOperationException(
-					string.Format(
-						"The {0}.GeneratedContainerAssemblyLocation property value is null, empty or whitespace."
-					  , Settings.GetType().Name)
-					);
-			}
-			if (false == Directory.Exists(directory))
-			{
-				throw new DirectoryNotFoundException(
-					string.Format(
-						"The directory specified by the {0}.GeneratedContainerAssemblyLocation property value was not found."
-					  , Settings.GetType().Name)
-					);
-			}
-
-			string assemblyFileName = string.Format("{0}.dll", assemblyName);
-			return Path.Combine(directory, assemblyFileName);
-		}
 
 		private IContainer LoadContainer()
 		{
-			Assembly assembly = Assembly.LoadFrom(AssemblyFilename);
+			Assembly assembly;
+			try
+			{
+				assembly = Assembly.LoadFrom(AssemblyFilename);
+			}
+			catch (Exception ex)
+			{
+				throw new ContainerLoadException(ex, "The generated container assembly '{0}' could not be loaded. See the inner exception for details.", AssemblyFilename);
+			}
+
 			if (null == assembly)
 			{
-				// TODO: Fix this exception.
-				throw new Exception("Could not load the assembly.");
+				throw new ContainerLoadException("The generated container assembly '{0}' could not be loaded.", AssemblyFilename);
 			}
-			
+
 			return
 				(IContainer)assembly
 					.CreateInstance(
@@ -126,6 +80,64 @@ namespace Speedioc.CodeGeneration
 		private bool ShouldGenerateContainer()
 		{
 			return Settings.ForceCompile || false == File.Exists(AssemblyFilename);
+		}
+
+		protected void ValidateContainerSettings(IContainerSettings settings)
+		{
+			if (string.IsNullOrWhiteSpace(Settings.GeneratedContainerNamespace))
+			{
+				throw new ContainerSettingsValidationException(GetIsNullEmptyOrWhitespaceMessage("GeneratedContainerNamespace"));
+			}
+
+			if (string.IsNullOrWhiteSpace(Settings.GeneratedContainerClassName))
+			{
+				throw new ContainerSettingsValidationException(GetIsNullEmptyOrWhitespaceMessage("GeneratedContainerClassName"));
+			}
+
+			if (string.IsNullOrWhiteSpace(Settings.GeneratedContainerAssemblyName))
+			{
+				throw new ContainerSettingsValidationException(GetIsNullEmptyOrWhitespaceMessage("GeneratedContainerAssemblyName"));
+			}
+
+			if (string.IsNullOrWhiteSpace(Settings.GeneratedContainerAssemblyLocation))
+			{
+				throw new ContainerSettingsValidationException(GetIsNullEmptyOrWhitespaceMessage("GeneratedContainerAssemblyLocation"));
+			}
+
+			if (false == Directory.Exists(Settings.GeneratedContainerAssemblyLocation))
+			{
+				throw new DirectoryNotFoundException(
+					"The directory specified by IContainerSettings.GeneratedContainerAssemblyLocation property value was not found."
+					);
+			}
+		}
+
+		private static string GetIsNullEmptyOrWhitespaceMessage(string propertyName)
+		{
+			return string.Format("The IContainerSettings.{0} property value is null, empty or whitespace.", propertyName);
+		}
+
+		private static Dictionary<string, Assembly> InitializeReferencedAssemblies()
+		{
+			Dictionary<string, Assembly> dictionary = new Dictionary<string, Assembly>();
+
+			// mscorlib.dll
+			Assembly assembly = typeof(object).Assembly;	// The System.Object type is used to get a reference to the mscorlib assembly.
+			dictionary.Add(assembly.FullName, assembly);
+
+			// System.dll
+			assembly = typeof(Uri).Assembly;				// The System.Uri type is used to get a reference to the System assembly.
+			dictionary.Add(assembly.FullName, assembly);
+
+			// System.Core.dll
+			assembly = typeof(IQueryProvider).Assembly;		// The System.Linq.IQueryProvider type is used to get a reference to the System.Core assembly.
+			dictionary.Add(assembly.FullName, assembly);
+
+			// Speedioc.dll
+			assembly = Assembly.GetExecutingAssembly();
+			dictionary.Add(assembly.FullName, assembly);
+
+			return dictionary;
 		}
 	}
 }
