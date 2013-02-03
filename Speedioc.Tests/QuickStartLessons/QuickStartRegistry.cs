@@ -1,8 +1,7 @@
-﻿using QuickStartSampleApp.Domain;
-using Speedioc;
-using Speedioc.Registration;
+﻿using Speedioc.Registration;
+using Speedioc.TestDomain;
 
-namespace QuickStartSampleApp
+namespace Speedioc.QuickStartLessons
 {
 	/// <summary>
 	/// Registers dependencies in the Speedioc container.
@@ -12,7 +11,7 @@ namespace QuickStartSampleApp
 	/// Each registry class should derive from the Speedioc.Registration.Registry class (easy) 
 	/// or implement the Speedioc.Registration.IRegistry interface (advanced).
 	/// </remarks>
-	public class DependencyRegistry : Registry
+	public class QuickStartRegistry : Registry
 	{
 		// You must override the RegisterTypes() method of the base Speedioc.Registration.Registry class.
 		// This method is the entry-point of the registry implementation that will be called by the 
@@ -24,6 +23,7 @@ namespace QuickStartSampleApp
 		{
 			// The registry uses a fluent-style API to register types.
 
+			// See Lessons 01 and 02.
 			// The most simple case:
 			// Register a concrete type with no mappings or injection.
 			Register<BoringCar>();
@@ -34,6 +34,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 03 and 04.
 			// The next simple, but more useful case:
 			// Register a concrete type that is mapped to an abstraction.
 			Register<Car>().As<IVehicle>();
@@ -45,6 +46,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 05 and 06.
 			// Next, a named registration.
 			// Register a concrete type that is mapped to an abstraction that is registered 
 			// with a name (or key).
@@ -58,6 +60,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 07 and 08.
 			// Next, specifying a lifetime.
 			// Register a concrete type that is mapped to an abstraction that is registered 
 			// with a name (or key) and an explicit transient lifetime.
@@ -71,6 +74,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 09 and 10.
 			// Order of operations.
 			// Register a concrete type that is mapped to an abstraction that is registered 
 			// with a name (or key) and an explicit transient lifetime.
@@ -84,6 +88,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 11 and 12.
 			// Method chaining and code formatting.
 			// Register a concrete type that is mapped to an abstraction that is registered 
 			// with a name (or key) and an explicit transient lifetime.
@@ -99,6 +104,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 13 and 14.
 			// Container lifetime
 			// Register a concrete type that is mapped to an abstraction that is explicitly 
 			// set with a container lifetime, which is the main type of singleton, one 
@@ -113,6 +119,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 13 and 14. (Yes, it's true: lessons 13 and 14 again)
 			// Container lifetime with a precreated instance
 			// Register a concrete type that is mapped to an abstraction that is explicitly 
 			// set with a pre-created container lifetime, which is the main type of singleton, one 
@@ -137,6 +144,8 @@ namespace QuickStartSampleApp
 			//
 			//---------------------------------------------------------------------------------------------------
 
+
+			// See Lessons 15 and 16.
 			// Introduction to constructor Injection
 			Register<Color>()
 				.As<IColor>()
@@ -176,6 +185,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 17 and 18.
 			// Constructor Injection: Simple Resolved Parameter
 			Register<Color>()
 				.As<IColor>()
@@ -199,6 +209,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 19 and 20.
 			// Constructor Injection: Named Resolved Parameter
 			Register<Color>()
 				.As<IColor>()
@@ -219,6 +230,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 21 and 22.
 			// Constructor Injection: Value Factory Parameter
 			Register<Color>()
 				.As<IColor>()
@@ -243,6 +255,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 21 and 22. (Yep, lessons 21 and 22 again)
 			// Order of operations revisited.
 			Register<Color>()
 				.As<IColor>()
@@ -263,6 +276,7 @@ namespace QuickStartSampleApp
 			//---------------------------------------------------------------------------------------------------
 
 
+			// See Lessons 23 and 24.
 			// Constructor Injection: Multiple Parameters
 			Register<ColorScheme>()
 				.As<IColorScheme>()

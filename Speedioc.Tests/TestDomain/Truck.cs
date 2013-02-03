@@ -1,20 +1,20 @@
-﻿namespace QuickStartSampleApp.Domain
+﻿namespace Speedioc.TestDomain
 {
-	public class Car : IVehicle
+	public class Truck : IVehicle
 	{
-		public Car()
+		public Truck()
 		{
 			ColorScheme = new ColorScheme("White", new WhiteColor(), new WhiteColor());
 		}
 
-		public Car(string make, string model)
+		public Truck(string make, string model)
 			: this()
 		{
 			Make = make;
 			Model = model;
 		}
 
-		public Car(string make, string model, IColorScheme colorScheme)
+		public Truck(string make, string model, IColorScheme colorScheme)
 			: this()
 		{
 			Make = make;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace QuickStartSampleApp.Domain
+namespace Speedioc.TestDomain
 {
 	public class Color : IColor
 	{
@@ -28,6 +28,11 @@ namespace QuickStartSampleApp.Domain
 				throw new ArgumentNullException("color");
 			}
 			_innerColor = color;
+		}
+
+		public IColor InnerColor
+		{
+			get { return _innerColor; }
 		}
 
 		public string Name

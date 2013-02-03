@@ -77,5 +77,6 @@ To install Speedioc, run the following command in the Package Manager Console:
 
 `PM> Install-Package Speedioc`
 
-For examples of how to begin using Speedioc, see the Examples\QuickStartSampleApp 
-project in the Speedioc source code.
+For examples of how to begin using Speedioc, see the Quick Start Lessons 
+located in the Speedioc source code within the Speedioc.Tests project.
+See Speedioc.Tests/QuickStartLessons/README.txt for more information.

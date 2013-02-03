@@ -30,10 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{4055B5F0-FADC-47D9-9738-10CB06FED359}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickStartSampleApp", "Examples\QuickStartSampleApp\QuickStartSampleApp.csproj", "{58764BA0-14B6-4180-ACB5-9739BCA52BE7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,15 +44,8 @@ Global
 		{932EE47C-C64A-43F1-A4C5-435926516A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{932EE47C-C64A-43F1-A4C5-435926516A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{932EE47C-C64A-43F1-A4C5-435926516A80}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58764BA0-14B6-4180-ACB5-9739BCA52BE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58764BA0-14B6-4180-ACB5-9739BCA52BE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58764BA0-14B6-4180-ACB5-9739BCA52BE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58764BA0-14B6-4180-ACB5-9739BCA52BE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{58764BA0-14B6-4180-ACB5-9739BCA52BE7} = {4055B5F0-FADC-47D9-9738-10CB06FED359}
 	EndGlobalSection
 EndGlobal
