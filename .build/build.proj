@@ -48,7 +48,7 @@
 		This NUnit task is being used as it allows any available copy of NUnit (any version) 
 		to be used within MSBuild. This is preferred over the NUnit task in MSBuild.Community.Tasks.
 	    *******************************************************************************************-->
-	<UsingTask AssemblyFile="$(BuildDir)MSBuild.NUnit.dll" TaskName="MSBuild.Tasks.NUnit" />
+	<UsingTask AssemblyFile="$(NuGetPackagesDir)MSBuild.NUnit.1.0.2\tools\MSBuild.NUnit.dll" TaskName="MSBuild.Tasks.NUnit" />
 
 <!--
 ***************************************************************************************************
